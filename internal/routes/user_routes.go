@@ -2,9 +2,9 @@
 package routes
 
 import (
-	"github.com/Waldir-TG/api-medical-heart-v1/controllers"
-	"github.com/Waldir-TG/api-medical-heart-v1/middleware"
-	"github.com/Waldir-TG/api-medical-heart-v1/services"
+	"github.com/Waldir-TG/api-medical-heart-v1/internal/controllers"
+	"github.com/Waldir-TG/api-medical-heart-v1/internal/middleware"
+	"github.com/Waldir-TG/api-medical-heart-v1/internal/services"
 	"github.com/gofiber/fiber/v2"
 )
 

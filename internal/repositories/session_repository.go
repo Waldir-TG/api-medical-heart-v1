@@ -38,7 +38,7 @@ func (r *SessionRepository) ValidateSession(ctx context.Context, token string) (
 	var (
 		sessionID uuid.UUID
 		userID    uuid.UUID
-		roleID    int
+		roleID    uuid.UUID
 		roleName  string
 		firstName string
 		lastName  string

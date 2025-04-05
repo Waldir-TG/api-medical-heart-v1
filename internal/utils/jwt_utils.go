@@ -12,13 +12,13 @@ var jwtSecret = []byte("your-secret-key") // Usar una variable de entorno en pro
 
 type Claims struct {
 	UserID   uuid.UUID `json:"user_id"`
-	RoleID   int       `json:"role_id"`
+	RoleID   uuid.UUID `json:"role_id"`
 	RoleName string    `json:"role_name"`
 	jwt.RegisteredClaims
 }
 
 // GenerateJWT genera un token JWT
-func GenerateJWT(userID uuid.UUID, roleID int, roleName string, expiresAt time.Time) (string, error) {
+func GenerateJWT(userID uuid.UUID, roleID uuid.UUID, roleName string, expiresAt time.Time) (string, error) {
 	claims := Claims{
 		UserID:   userID,
 		RoleID:   roleID,

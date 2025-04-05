@@ -11,7 +11,7 @@ type User struct {
 	ID                  uuid.UUID  `json:"id"`
 	Email               string     `json:"email"`
 	PasswordHash        string     `json:"-"` // No se serializa en JSON
-	RoleID              int        `json:"role_id"`
+	RoleID              uuid.UUID  `json:"role_id"`
 	RoleName            string     `json:"role_name,omitempty"`
 	FirstName           string     `json:"first_name"`
 	LastName            string     `json:"last_name"`
