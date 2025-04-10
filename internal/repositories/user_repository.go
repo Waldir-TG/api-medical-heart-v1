@@ -21,7 +21,6 @@ func NewUserRepository(database *db.PostgresDB) *UserRepository {
 
 func (r *UserRepository) CreateUser(ctx context.Context, user *models.RegisterRequest, passwordHash string) (uuid.UUID, error) {
 	var userID uuid.UUID
-
 	err := r.db.Pool.QueryRow(ctx, `
 		CALL create_user($1, $2, $3, $4, $5, $6, NULL)
 	`, user.Email, passwordHash, user.RoleID, user.FirstName, user.LastName, user.PhoneNumber).Scan(&userID)

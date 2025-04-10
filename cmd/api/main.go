@@ -18,6 +18,10 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// @title Medical Heart API
+// @version 1.0
+// @description API for managing medical heart data
+// @BasePath /
 func main() {
 	// Cargar variables de entorno
 	if err := godotenv.Load(); err != nil {
@@ -34,10 +38,12 @@ func main() {
 	// Inicializar repositorios
 	userRepo := repositories.NewUserRepository(database)
 	sessionRepo := repositories.NewSessionRepository(database)
+	doctorRepo := repositories.NewDoctorRepository(database)
 
 	// Inicializar servicios
 	authService := services.NewAuthService(userRepo, sessionRepo)
 	userService := services.NewUserService(userRepo)
+	doctorService := services.NewDoctorService(doctorRepo)
 
 	// Configurar aplicación Fiber
 	app := fiber.New(fiber.Config{
@@ -54,6 +60,35 @@ func main() {
 		},
 	})
 
+	// Ruta para servir el archivo swagger.json
+	app.Get("/swagger.json", func(c *fiber.Ctx) error {
+		return c.SendFile("./docs/swagger.json")
+	})
+
+	// Ruta para servir RapiDoc (HTML interactivo)
+	app.Get("/docs", func(c *fiber.Ctx) error {
+		html := `
+		<!doctype html>
+		<html>
+			<head>
+				<meta charset="utf-8">
+				<script 
+					type="module" 
+					src="https://unpkg.com/rapidoc/dist/rapidoc-min.js"
+				></script>
+			</head>
+			<body>
+				<rapi-doc 
+					spec-url="/swagger.json" 
+					theme="light"
+				></rapi-doc>
+			</body>
+		</html>
+		`
+		c.Type("html")
+		return c.SendString(html)
+	})
+
 	// Middlewares globales
 	app.Use(logger.New())
 	app.Use(recover.New())
@@ -67,6 +102,7 @@ func main() {
 	// Configurar rutas
 	routes.SetupAuthRoutes(app, authService)
 	routes.SetupUserRoutes(app, authService, userService)
+	routes.SetupDoctorRoutes(app, doctorService)
 
 	// Iniciar servidor
 	go func() {

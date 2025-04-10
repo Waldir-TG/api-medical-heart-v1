@@ -29,10 +29,10 @@ type LoginRequest struct {
 }
 
 type RegisterRequest struct {
-	Email       string  `json:"email" validate:"required,email"`
-	Password    string  `json:"password" validate:"required,min=8"`
-	FirstName   string  `json:"first_name" validate:"required"`
-	LastName    string  `json:"last_name" validate:"required"`
-	PhoneNumber *string `json:"phone_number"`
-	RoleID      int     `json:"role_id" validate:"required"`
+	Email       string    `json:"email" validate:"required,email"`
+	Password    string    `json:"password" validate:"required,min=8"`
+	FirstName   string    `json:"first_name" validate:"required"`
+	LastName    string    `json:"last_name" validate:"required"`
+	PhoneNumber *string   `json:"phone_number"`
+	RoleID      uuid.UUID `json:"role_id" validate:"required"`
 }

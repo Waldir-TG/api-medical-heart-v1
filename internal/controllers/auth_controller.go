@@ -2,6 +2,9 @@
 package controllers
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/Waldir-TG/api-medical-heart-v1/internal/models"
 	"github.com/Waldir-TG/api-medical-heart-v1/internal/services"
 	"github.com/gofiber/fiber/v2"
@@ -18,6 +21,16 @@ func NewAuthController(authService *services.AuthService) *AuthController {
 }
 
 // Register maneja el registro de nuevos usuarios
+// @Summary      Registrar un nuevo usuario
+// @Description  Crea una nueva cuenta de usuario en el sistema
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        request body models.RegisterRequest true "Datos de registro"
+// @Success      201  {object}  map[string]interface{}  "Usuario registrado exitosamente"
+// @Failure      400  {object}  map[string]string       "Cuerpo de solicitud inválido"
+// @Failure      400  {object}  map[string]string       "Error en los datos de registro"
+// @Router       /api/auth/register [post]
 func (c *AuthController) Register(ctx *fiber.Ctx) error {
 	var req models.RegisterRequest
 
@@ -38,6 +51,9 @@ func (c *AuthController) Register(ctx *fiber.Ctx) error {
 		})
 	}
 
+	//imprime el request
+	fmt.Println(&req)
+
 	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"message": "User registered successfully",
 		"user_id": userID,
@@ -45,6 +61,16 @@ func (c *AuthController) Register(ctx *fiber.Ctx) error {
 }
 
 // Login maneja el inicio de sesión de usuarios
+// @Summary      Iniciar sesión
+// @Description  Autentica a un usuario y genera un token de acceso
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        request body models.LoginRequest true "Credenciales de acceso"
+// @Success      200  {object}  models.AuthResponse  "Autenticación exitosa"
+// @Failure      400  {object}  map[string]string    "Cuerpo de solicitud inválido o campos faltantes"
+// @Failure      401  {object}  map[string]string    "Credenciales inválidas"
+// @Router       /api/auth/login [post]
 func (c *AuthController) Login(ctx *fiber.Ctx) error {
 	var req models.LoginRequest
 
@@ -74,10 +100,32 @@ func (c *AuthController) Login(ctx *fiber.Ctx) error {
 		})
 	}
 
+	// ExpiresAt := time.Now().Add(time.Hour)
+
+	cookie := new(fiber.Cookie)
+	cookie.Name = "Authorization"
+	cookie.Value = "Bearer " + authResponse.Token
+	cookie.HTTPOnly = true  // Importante para seguridad
+	cookie.Secure = false   // Solo en HTTPS (en producción)
+	cookie.SameSite = "Lax" // o "Strict" para más seguridad
+	cookie.Expires = time.Now().Add(24 * time.Hour)
+
+	ctx.Cookie(cookie)
+
 	return ctx.Status(fiber.StatusOK).JSON(authResponse)
 }
 
 // Logout maneja el cierre de sesión de usuarios
+// @Summary      Cerrar sesión
+// @Description  Invalida el token de acceso del usuario
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Success      200  {object}  map[string]string  "Sesión cerrada exitosamente"
+// @Failure      400  {object}  map[string]string  "Header de autorización faltante"
+// @Failure      500  {object}  map[string]string  "Error al invalidar el token"
+// @Router       /api/auth/logout [post]
 func (c *AuthController) Logout(ctx *fiber.Ctx) error {
 	// Obtener el token del header Authorization
 	authHeader := ctx.Get("Authorization")
@@ -104,6 +152,14 @@ func (c *AuthController) Logout(ctx *fiber.Ctx) error {
 }
 
 // ValidateSession verifica si una sesión es válida
+// @Summary      Validar sesión
+// @Description  Verifica si el token de acceso del usuario es válido
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Success      200  {object}  map[string]interface{}  "Token válido con información del usuario"
+// @Router       /api/auth/validate [get]
 func (c *AuthController) ValidateSession(ctx *fiber.Ctx) error {
 	// El usuario ya está verificado por el middleware de autenticación
 	user := ctx.Locals("user").(*models.User)

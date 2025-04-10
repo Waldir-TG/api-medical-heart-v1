@@ -2,6 +2,7 @@
 package middleware
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/Waldir-TG/api-medical-heart-v1/internal/services"
@@ -13,7 +14,8 @@ import (
 func AuthMiddleware(authService *services.AuthService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// Obtener el token del header Authorization
-		authHeader := c.Get("Authorization")
+		authHeader := c.Cookies("Authorization")
+		fmt.Println("Token recibido:", authHeader)
 		if authHeader == "" {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"error": "Authorization header is required",
