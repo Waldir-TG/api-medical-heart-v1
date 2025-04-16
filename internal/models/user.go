@@ -24,3 +24,21 @@ type User struct {
 	ResetToken          *string    `json:"-"`
 	ResetTokenExpires   *time.Time `json:"-"`
 }
+
+// PasswordResetRequest representa la solicitud de reseteo de contraseña
+type PasswordResetRequest struct {
+	Email string `json:"email" validate:"required,email"`
+}
+
+// PasswordUpdateRequest representa la solicitud para actualizar contraseña
+type PasswordUpdateRequest struct {
+	OldPassword string `json:"old_password" validate:"required"`
+	NewPassword string `json:"new_password" validate:"required,min=8"`
+}
+
+// UserUpdateRequest representa la solicitud para actualizar un usuario
+type UserUpdateRequest struct {
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
+	PhoneNumber string `json:"phone_number"`
+}

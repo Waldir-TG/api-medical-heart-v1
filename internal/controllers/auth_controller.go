@@ -128,15 +128,15 @@ func (c *AuthController) Login(ctx *fiber.Ctx) error {
 // @Router       /api/auth/logout [post]
 func (c *AuthController) Logout(ctx *fiber.Ctx) error {
 	// Obtener el token del header Authorization
-	authHeader := ctx.Get("Authorization")
-	if authHeader == "" {
+	authCookie := ctx.Cookies("Authorization")
+	if authCookie == "" {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Authorization header is required",
 		})
 	}
 
 	// Extraer el token
-	token := authHeader[7:] // Eliminar "Bearer "
+	token := authCookie[7:] // Eliminar "Bearer "
 
 	// Invalidar sesión
 	err := c.authService.Logout(ctx.Context(), token)
@@ -145,6 +145,8 @@ func (c *AuthController) Logout(ctx *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
+
+	ctx.ClearCookie("Authorization")
 
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "Logged out successfully",

@@ -12,4 +12,7 @@ func SetupDoctorRoutes(app *fiber.App, doctorServices *services.DoctorService) {
 	doctor := app.Group("/api/doctor")
 
 	doctor.Get("/", doctorController.GetDoctors)
+	doctor.Get("/:id", doctorController.GetDoctorDetail)
+	doctor.Post("/", doctorController.CreateDoctor)
+	doctor.Patch("/:id", doctorController.UpdateDoctor)
 }

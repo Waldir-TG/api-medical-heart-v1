@@ -6,16 +6,17 @@ import (
 	"github.com/google/uuid"
 )
 
+// Patient representa la información médica de un paciente
 type Patient struct {
 	ID                       uuid.UUID `json:"id"`
 	UserID                   uuid.UUID `json:"user_id"`
-	DateOfBirth              string    `json:"date_of_birth"`
-	Gender                   string    `json:"gender"`
+	DateOfBirth              time.Time `json:"date_of_birth"`
+	Gender                   string    `json:"gender"` // Considerar usar un tipo enum personalizado
 	BloodType                string    `json:"blood_type"`
-	HeightCM                 float32   `json:"height_cm"`
-	WeightKG                 float32   `json:"weight_kg"`
-	MedicalConditions        string    `json:"medical_conditions"`
-	Allergies                string    `json:"allergies"`
+	HeightCm                 int       `json:"height_cm"`
+	WeightKg                 float64   `json:"weight_kg"`
+	MedicalConditions        []string  `json:"medical_conditions"`
+	Allergies                []string  `json:"allergies"`
 	EmergencyContactName     string    `json:"emergency_contact_name"`
 	EmergencyContactPhone    string    `json:"emergency_contact_phone"`
 	EmergencyContactRelation string    `json:"emergency_contact_relation"`
@@ -24,4 +25,71 @@ type Patient struct {
 	MonitoringActive         bool      `json:"monitoring_active"`
 	CreatedAt                time.Time `json:"created_at"`
 	UpdatedAt                time.Time `json:"updated_at"`
+}
+
+// Doctor representa la información profesional de un médico
+
+// DoctorPatient representa la relación entre médicos y pacientes
+type DoctorPatient struct {
+	DoctorID     uuid.UUID `json:"doctor_id"`
+	PatientID    uuid.UUID `json:"patient_id"`
+	AssignedDate time.Time `json:"assigned_date"`
+}
+
+// PatientCreateRequest representa la solicitud para crear un paciente
+type PatientCreateRequest struct {
+	UserID                   string   `json:"user_id" validate:"required,uuid4"`
+	DateOfBirth              string   `json:"date_of_birth" validate:"required,datetime=2006-01-02"`
+	Gender                   string   `json:"gender" validate:"required,oneof=male female other"`
+	BloodType                string   `json:"blood_type" validate:"omitempty,oneof=A+ A- B+ B- AB+ AB- O+ O-"`
+	HeightCm                 int      `json:"height_cm" validate:"required,min=30,max=300"`
+	WeightKg                 float64  `json:"weight_kg" validate:"required,min=0.5,max=500"`
+	MedicalConditions        []string `json:"medical_conditions"`
+	Allergies                []string `json:"allergies"`
+	EmergencyContactName     string   `json:"emergency_contact_name" validate:"required"`
+	EmergencyContactPhone    string   `json:"emergency_contact_phone" validate:"required"`
+	EmergencyContactRelation string   `json:"emergency_contact_relation" validate:"required"`
+	MinHeartRate             int      `json:"min_heart_rate" validate:"required,min=20,max=200"`
+	MaxHeartRate             int      `json:"max_heart_rate" validate:"required,min=20,max=200,gtfield=MinHeartRate"`
+}
+
+type PatientUpdatedRequest struct {
+	DateOfBirth              *string   `json:"date_of_birth" validate:"datetime=2006-01-02"`
+	Gender                   *string   `json:"gender" validate:"oneof=male female other"`
+	BloodType                *string   `json:"blood_type" validate:"omitempty,oneof=A+ A- B+ B- AB+ AB- O+ O-"`
+	HeightCm                 *int      `json:"height_cm" validate:"min=30,max=300"`
+	WeightKg                 *float64  `json:"weight_kg" validate:"min=0.5,max=500"`
+	MedicalConditions        *[]string `json:"medical_conditions"`
+	Allergies                *[]string `json:"allergies"`
+	EmergencyContactName     *string   `json:"emergency_contact_name"`
+	EmergencyContactPhone    *string   `json:"emergency_contact_phone"`
+	EmergencyContactRelation *string   `json:"emergency_contact_relation"`
+	MinHeartRate             *int      `json:"min_heart_rate" validate:"min=20,max=200"`
+	MaxHeartRate             *int      `json:"max_heart_rate" validate:"min=20,max=200,gtfield=MinHeartRate"`
+	AlertRecipients          *bool     `json:"alert_recipients"`
+}
+
+// DoctorPatientAssignRequest representa la solicitud para asignar un médico a un paciente
+type DoctorPatientAssignRequest struct {
+	DoctorID  string `json:"doctor_id" validate:"required,uuid4"`
+	PatientID string `json:"patient_id" validate:"required,uuid4"`
+}
+
+type PatientDetailResponse struct {
+	Patient
+	UserInfo struct {
+		Email       string `json:"email"`
+		FirstName   string `json:"first_name"`
+		LastName    string `json:"last_name"`
+		PhoneNumber string `json:"phone_number"`
+		IsActive    bool   `json:"is_active"`
+	} `json:"user_info"`
+	AssignedDoctors []DoctorShortInfo  `json:"assigned_doctors,omitempty"`
+	FamilyMembers   []FamilyMemberInfo `json:"family_members,omitempty"`
+}
+
+type PatientShortInfo struct {
+	ID        uuid.UUID `json:"id"`
+	FullName  string    `json:"full_name"`
+	BirthDate time.Time `json:"birth_date"`
 }
